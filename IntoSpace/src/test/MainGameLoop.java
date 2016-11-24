@@ -1,11 +1,16 @@
 package test;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
 
+import entities.Camera;
+import entities.Entity;
+import entities.Light;
 import models.RawModel;
 import models.TexturedModel;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
+import renderEngine.OBJLoader;
 import renderEngine.Renderer;
 import shaders.StaticShader;
 import textures.ModelTexture;
@@ -16,46 +21,34 @@ public class MainGameLoop {
 		
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
-		Renderer renderer = new Renderer();
 		StaticShader shader = new StaticShader();
+		Renderer renderer = new Renderer(shader);
+		Camera camera = new Camera();
+		Light light = new Light(new Vector3f(20, 20, -25), new Vector3f(1, 0.7f, 0.7f));
 		
-		//OpenGL verticles
-		float[] verticles = {
-			0, 0, 0, //middle v0
-			-0.5f, 0.5f, 0, //top left v1
-			-0.5f, -0.5f, 0, //top right v2
-			0.5f, -0.5f, 0, //bottom right v3
-			0.5f, 0.5f, 0 //bottom left v4
-		};
-		
-		//OpenGL texture lineup
-		float[] textureCoords = {
-			0.5f, 0.5f, //middle v0
-			0,0, //top left v1
-			0,1, //top right v2
-			1,1, //bottom right v3
-			1,0 //bottom left v4
-		};
-		
-		//rectangle
-		int[] rectangle = {
-			0, 1, 4, //left
-			0, 2, 1, //top
-			0, 3, 2, //right
-			0, 4, 3 //bottom
-		};
-		
-		RawModel model = loader.loadToVAO(verticles, textureCoords, rectangle);
-		ModelTexture texture = new ModelTexture(loader.loadTexture("stars"));
-		TexturedModel texturedModel = new TexturedModel(model, texture);
+		RawModel model3 = OBJLoader.loadObjModel("dragon", loader);
+		ModelTexture texture3 = new ModelTexture(loader.loadTexture("stall"));
+		texture3.setShineDamper(15);
+		texture3.setReflectivity(1);
+		TexturedModel staticModel3 = new TexturedModel(model3, texture3);
+		Entity entity3 = new Entity(staticModel3, new Vector3f(0, 0, -5), 0, 0, 0, 0.1f);
 		
 		while(!Display.isCloseRequested()) {
-			renderer.prepare();
-			shader.start();
-			//gamelogic
-			//render
-			renderer.render(texturedModel);
-			shader.stop();
+			{//gamelogic
+				entity3.increaseRotation(0, 0.5f, 0);
+				
+				camera.move();
+			}
+			{//render
+				renderer.prepare();
+				shader.start();
+				shader.loadLight(light);
+				shader.loadViewMatrix(camera);
+				
+				renderer.render(entity3, shader);
+				
+				shader.stop();
+			}
 			DisplayManager.updateDisplay();
 		}
 		
