@@ -10,9 +10,8 @@ import models.RawModel;
 import models.TexturedModel;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
+import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
-import renderEngine.Renderer;
-import shaders.StaticShader;
 import textures.ModelTexture;
 
 public class MainGameLoop {
@@ -21,8 +20,6 @@ public class MainGameLoop {
 		
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
-		StaticShader shader = new StaticShader();
-		Renderer renderer = new Renderer(shader);
 		Camera camera = new Camera();
 		Light light = new Light(new Vector3f(20, 20, -25), new Vector3f(1, 0.7f, 0.7f));
 		
@@ -33,27 +30,19 @@ public class MainGameLoop {
 		TexturedModel staticModel3 = new TexturedModel(model3, texture3);
 		Entity entity3 = new Entity(staticModel3, new Vector3f(0, 0, -5), 0, 0, 0, 0.1f);
 		
+		MasterRenderer renderer = new MasterRenderer();
 		while(!Display.isCloseRequested()) {
 			{//gamelogic
 				entity3.increaseRotation(0, 0.5f, 0);
 				
 				camera.move();
 			}
-			{//render
-				renderer.prepare();
-				shader.start();
-				shader.loadLight(light);
-				shader.loadViewMatrix(camera);
-				
-				renderer.render(entity3, shader);
-				
-				shader.stop();
-			}
+			
+			renderer.processEntity(entity3);
+			renderer.render(light, camera);
 			DisplayManager.updateDisplay();
 		}
-		
-		shader.cleanUp();
-		loader.cleanUp();
+		renderer.cleanUp();
 		DisplayManager.closeDisplay();
 	}
 
