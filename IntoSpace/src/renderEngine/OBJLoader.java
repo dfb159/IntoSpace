@@ -33,34 +33,39 @@ public class OBJLoader {
 		float[] texturesArray = null;
 		int[] indicesArray = null;
 		try {
-			while((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				String[] currentLine = line.split(" ");
-				if(line.startsWith("v ")) {
-					vertices.add(new Vector3f(Float.parseFloat(currentLine[1]), 
-							Float.parseFloat(currentLine[2]), Float.parseFloat(currentLine[3])));
-				} else if(line.startsWith("vt ")) {
-					textures.add(new Vector2f(Float.parseFloat(currentLine[1]), 
+				if (line.startsWith("v ")) {
+					vertices.add(new Vector3f(Float.parseFloat(currentLine[1]),
+							Float.parseFloat(currentLine[2]),
+							Float.parseFloat(currentLine[3])));
+				} else if (line.startsWith("vt ")) {
+					textures.add(new Vector2f(Float.parseFloat(currentLine[1]),
 							Float.parseFloat(currentLine[2])));
-				} else if(line.startsWith("vn ")) {
-					normals.add(new Vector3f(Float.parseFloat(currentLine[1]), 
-							Float.parseFloat(currentLine[2]), Float.parseFloat(currentLine[3])));
-				} else if(line.startsWith("f ")) {
+				} else if (line.startsWith("vn ")) {
+					normals.add(new Vector3f(Float.parseFloat(currentLine[1]),
+							Float.parseFloat(currentLine[2]),
+							Float.parseFloat(currentLine[3])));
+				} else if (line.startsWith("f ")) {
 					String[] vertex1 = currentLine[1].split("/");
 					String[] vertex2 = currentLine[2].split("/");
 					String[] vertex3 = currentLine[3].split("/");
 
-					indices.add(new int[] {Integer.parseInt(vertex1[0]),
-							Integer.parseInt(vertex1[1]), Integer.parseInt(vertex1[2])});
-					indices.add(new int[] {Integer.parseInt(vertex2[0]),
-							Integer.parseInt(vertex2[1]), Integer.parseInt(vertex2[2])});
-					indices.add(new int[] {Integer.parseInt(vertex3[0]),
-							Integer.parseInt(vertex3[1]), Integer.parseInt(vertex3[2])});
+					indices.add(new int[] { Integer.parseInt(vertex1[0]),
+							Integer.parseInt(vertex1[1]),
+							Integer.parseInt(vertex1[2]) });
+					indices.add(new int[] { Integer.parseInt(vertex2[0]),
+							Integer.parseInt(vertex2[1]),
+							Integer.parseInt(vertex2[2]) });
+					indices.add(new int[] { Integer.parseInt(vertex3[0]),
+							Integer.parseInt(vertex3[1]),
+							Integer.parseInt(vertex3[2]) });
 				}
 			}
-			
+
 			verticesArray = new float[vertices.size() * 3];
 			int i = 0;
-			for(Vector3f v : vertices) {
+			for (Vector3f v : vertices) {
 				verticesArray[i++] = v.x;
 				verticesArray[i++] = v.y;
 				verticesArray[i++] = v.z;
@@ -68,17 +73,19 @@ public class OBJLoader {
 			normalsArray = new float[indices.size() * 3];
 			texturesArray = new float[indices.size() * 2];
 			indicesArray = new int[indices.size()];
-			
+
 			i = 0;
-			for(int[] index : indices) {
+			for (int[] index : indices) {
 				int currentIndex = index[0] - 1;
 				Vector2f tex = textures.get(index[1] - 1);
 				Vector3f nor = normals.get(index[2] - 1);
-				
-				if(currentIndex * 3 >= normalsArray.length || currentIndex * 2 >= texturesArray.length || currentIndex >= indicesArray.length) {
+
+				if (currentIndex * 3 >= normalsArray.length
+						|| currentIndex * 2 >= texturesArray.length
+						|| currentIndex >= indicesArray.length) {
 					System.out.println("Corrupt file");
 				}
-				
+
 				indicesArray[i++] = currentIndex;
 				texturesArray[currentIndex * 2] = tex.x;
 				texturesArray[currentIndex * 2 + 1] = 1 - tex.y;
@@ -86,12 +93,13 @@ public class OBJLoader {
 				normalsArray[currentIndex * 3 + 1] = nor.y;
 				normalsArray[currentIndex * 3 + 2] = nor.z;
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			System.err.println("Error while reading file " + fileName + ".obj");
 			e.printStackTrace();
 		}
-		
-		return loader.loadToVAO(verticesArray, texturesArray, normalsArray, indicesArray);
+
+		return loader.loadToVAO(verticesArray, texturesArray, normalsArray,
+				indicesArray);
 	}
-	
+
 }
