@@ -5,12 +5,16 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class ThirdPersonCamera extends Camera {
 
-	Player			player				= null;
+	Player						player				= null;
 
-	private float	distanceFromPlayer	= 50.0f;
-	private float	angleAroundPlayer	= 0.0f;
-	private float	minDistance			= 1.0f;
-	private float	maxDistance			= 50.0f;
+	private static final float	DEFAULT_DISTANCE	= 10.0f;
+	private static final float	DEFAULT_PITCH		= 20.0f;
+
+	private float				distanceFromPlayer	= 10.0f;
+	private float				angleAroundPlayer	= 0.0f;
+	private float				minDistance			= 1.0f;
+	private float				maxDistance			= 50.0f;
+	private Vector3f			posOffset			= new Vector3f(0, 0, 0);
 
 	public ThirdPersonCamera() {
 		super();
@@ -30,6 +34,22 @@ public class ThirdPersonCamera extends Camera {
 		this.player = player;
 	}
 
+	public void setDistance(float distance) {
+		this.distanceFromPlayer = distance;
+	}
+
+	public float getDistance() {
+		return distanceFromPlayer;
+	}
+
+	public void setAngle(float angle) {
+		this.angleAroundPlayer = angle;
+	}
+
+	public float getAngle() {
+		return angleAroundPlayer;
+	}
+
 	public void move() {
 		if (player != null) {
 			calculateZoom();
@@ -43,6 +63,11 @@ public class ThirdPersonCamera extends Camera {
 
 	public void bindPlayer(Player player) {
 		this.player = player;
+		super.setPitch(20);
+	}
+
+	public void setOffset(Vector3f offset) {
+		this.posOffset = offset;
 	}
 
 	private void calculatePosition() {
@@ -56,6 +81,7 @@ public class ThirdPersonCamera extends Camera {
 				.sin(Math.toRadians(player.getRotY() + angleAroundPlayer));
 		newPos.z = player.getPosition().z - hDistance * (float) Math
 				.cos(Math.toRadians(player.getRotY() + angleAroundPlayer));
+		Vector3f.add(newPos, posOffset, newPos);
 		super.setPosition(newPos);
 	}
 
@@ -80,5 +106,11 @@ public class ThirdPersonCamera extends Camera {
 			float pitchChange = Mouse.getDY() * 0.1f;
 			super.increasePitch(-pitchChange);
 		}
+	}
+
+	public void resetRelativePosition() {
+		super.setPitch(DEFAULT_PITCH);
+		this.setDistance(DEFAULT_DISTANCE);
+		this.setAngle(0);
 	}
 }

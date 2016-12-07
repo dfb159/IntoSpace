@@ -15,7 +15,7 @@ public class Player extends Entity {
 	private static final float	TURN_GAIN			= 400.0f;
 	private static final float	TURN_STOP			= 400.0f;
 	private static final float	GRAVITY				= 9.81f;
-	private static final float	JUMP_POWER			= 7.0f;
+	private static final float	JUMP_POWER			= 8.0f;
 
 	private float				currentSpeed		= 0.0f;
 	private float				currentTurnSpeed	= 0.0f;
@@ -31,13 +31,13 @@ public class Player extends Entity {
 	public Player(TexturedModel model, Vector3f position, float rotX,
 			float rotY, float rotZ, float scale) {
 		super(model, position, rotX, rotY, rotZ, scale);
+		inJump = true;
 	}
 
 	public void move() {
 		checkInputs();
 		checkMovement();
 		doMove();
-		checkPosition();
 	}
 
 	private void checkInputs() {
@@ -88,7 +88,6 @@ public class Player extends Entity {
 			if (jump) {
 				inJump = true;
 				currentJumpSpeed = JUMP_POWER;
-				currentTurnSpeed = 0.0f;
 			}
 		}
 
@@ -107,7 +106,9 @@ public class Player extends Entity {
 
 	private void doMove() {
 		float delta = DisplayManager.getTimeDelta();
-		super.increaseRotation(0, currentTurnSpeed * delta, 0);
+		if (!inJump) {
+			super.increaseRotation(0, currentTurnSpeed * delta, 0);
+		}
 		float distance = currentSpeed * delta;
 		super.increasePosition(
 				(float) Math.sin(Math.toRadians(getRotY())) * distance,
@@ -115,10 +116,12 @@ public class Player extends Entity {
 				(float) Math.cos(Math.toRadians(getRotY())) * distance);
 	}
 
-	private void checkPosition() {
-		if (super.getPosition().y < 0.0f) {
-			super.getPosition().y = 0.0f;
+	public void checkPosition(float terrainHeight) {
+		if (super.getPosition().y < terrainHeight) {
+			super.getPosition().y = terrainHeight;
 			inJump = false;
+		} else {
+			inJump = true;
 		}
 	}
 

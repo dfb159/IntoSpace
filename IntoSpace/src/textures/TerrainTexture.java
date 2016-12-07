@@ -1,5 +1,7 @@
 package textures;
 
+import renderEngine.DisplayManager;
+
 public class TerrainTexture {
 
 	private int textureID;
@@ -7,6 +9,10 @@ public class TerrainTexture {
 	public TerrainTexture(int textureID) {
 		super();
 		this.textureID = textureID;
+	}
+
+	public TerrainTexture(String fileName) {
+		this(DisplayManager.getLoader().loadTexture(fileName));
 	}
 
 	public int getID() {

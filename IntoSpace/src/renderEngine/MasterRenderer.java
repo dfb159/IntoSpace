@@ -13,10 +13,15 @@ import entities.Camera;
 import entities.Entity;
 import entities.Fog;
 import entities.Light;
+import gui.GuiRenderer;
 import models.TexturedModel;
-import shaders.StaticShader;
-import shaders.TerrainShader;
+import shader.EntityRenderer;
+import shader.StaticShader;
+import skybox.SkyboxRenderer;
 import terrain.Terrain;
+import terrain.TerrainRenderer;
+import terrain.TerrainShader;
+import textures.GuiTexture;
 
 public class MasterRenderer {
 
@@ -31,40 +36,57 @@ public class MasterRenderer {
 	private Matrix4f							projectionMatrix;
 
 	private EntityRenderer						entityRenderer;
-	private StaticShader						entityShader;
+	private StaticShader						entityShader	= new StaticShader();
 	private TerrainRenderer						terrainRenderer;
 	private TerrainShader						terrainShader	= new TerrainShader();
+	private SkyboxRenderer						skyboxRenderer;
+	private GuiRenderer							guiRenderer;
 
 	private Map<TexturedModel, List<Entity>>	entities		= new HashMap<TexturedModel, List<Entity>>();
 	private List<Terrain>						terrains		= new ArrayList<Terrain>();
+	private List<GuiTexture>					guis			= new ArrayList<GuiTexture>();
 
-	public MasterRenderer() {
+	private boolean isDestructive = true;
+	
+	public MasterRenderer(Loader loader) {
 		enableCulling();
 		createProjectionMatrix();
-		entityShader = new StaticShader();
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		skyboxRenderer = new SkyboxRenderer(projectionMatrix);
+		guiRenderer = new GuiRenderer();
 	}
 
-	public void render(Light light, Camera camera, Fog fog) {
+	public void render(List<Light> lights, Camera camera, Fog fog) {
 		prepare();
 
 		entityShader.start();
 		entityShader.loadFog(fog);
-		entityShader.loadLight(light);
+		entityShader.loadLights(lights);
 		entityShader.loadViewMatrix(camera);
 		entityRenderer.render(entities);
 		entityShader.stop();
 
 		terrainShader.start();
 		terrainShader.loadFog(fog);
-		terrainShader.loadLight(light);
+		terrainShader.loadLights(lights);
 		terrainShader.loadViewMatrix(camera);
 		terrainRenderer.render(terrains);
 		terrainShader.stop();
 
-		entities.clear();
-		terrains.clear();
+		skyboxRenderer.render(camera, fog);
+
+		guiRenderer.render(guis);
+
+		if (isDestructive) {
+			entities.clear();
+			terrains.clear();
+			guis.clear();
+		}
+	}
+	
+	public void setDestructivity(boolean destructive) {
+		isDestructive = destructive;
 	}
 
 	public static void enableCulling() {
@@ -92,9 +114,22 @@ public class MasterRenderer {
 		terrains.add(terrain);
 	}
 
+	public void setTerrainProcessList(List<Terrain> terrain) {
+		this.terrains = terrain;
+	}
+	
+	public void processGui(GuiTexture gui) {
+		guis.add(gui);
+	}
+	
+	public void setGuiProcessList(List<GuiTexture> gui) {
+		this.guis = gui;
+	}
+
 	public void cleanUp() {
 		entityShader.cleanUp();
 		terrainShader.cleanUp();
+		guiRenderer.cleanUp();
 	}
 
 	public void prepare() {
@@ -118,5 +153,9 @@ public class MasterRenderer {
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
+	}
+
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
 	}
 }

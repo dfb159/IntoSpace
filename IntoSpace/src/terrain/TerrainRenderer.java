@@ -1,4 +1,4 @@
-package renderEngine;
+package terrain;
 
 import java.util.List;
 
@@ -10,8 +10,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import models.RawModel;
-import shaders.TerrainShader;
-import terrain.Terrain;
+import renderEngine.DisplayManager;
 import textures.TerrainTexturePack;
 import toolbox.Maths;
 
@@ -25,6 +24,10 @@ public class TerrainRenderer {
 		shader.loadProjectionMatrix(projectionMatrix);
 		shader.connectTextureUnits();
 		shader.stop();
+	}
+	
+	public TerrainRenderer(TerrainShader shader) {
+		this(shader, DisplayManager.getProjectionMatrix());
 	}
 
 	public void render(List<Terrain> terrains) {

@@ -1,4 +1,4 @@
-package renderEngine;
+package shader;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,8 @@ import org.lwjgl.util.vector.Matrix4f;
 import entities.Entity;
 import models.RawModel;
 import models.TexturedModel;
-import shaders.StaticShader;
+import renderEngine.DisplayManager;
+import renderEngine.MasterRenderer;
 import textures.ModelTexture;
 import toolbox.Maths;
 
@@ -26,6 +27,10 @@ public class EntityRenderer {
 		shader.loadProjectionMatrix(projectionMatrix);
 		shader.stop();
 	}
+	
+	public EntityRenderer(StaticShader shader) {
+		this(shader, DisplayManager.getProjectionMatrix());
+	}
 
 	public void render(Map<TexturedModel, List<Entity>> entities) {
 		for (TexturedModel model : entities.keySet()) {
@@ -36,6 +41,7 @@ public class EntityRenderer {
 				GL11.glDrawElements(GL11.GL_TRIANGLES,
 						model.getRawModel().getVertexCount(),
 						GL11.GL_UNSIGNED_INT, 0);
+//				GL11.glPolygonMode( GL11.GL_FRONT_AND_BACK, GL11.GL_LINE );
 			}
 			unbindTexturedModel();
 		}
@@ -48,6 +54,7 @@ public class EntityRenderer {
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
 		ModelTexture texture = model.getTexture();
+		shader.loadNumberOfRows(texture.getNumberOfAtlasRows());
 		if(texture.isHasTransparency()) {
 			MasterRenderer.disableCulling();
 		}
@@ -71,5 +78,6 @@ public class EntityRenderer {
 				entity.getPosition(), entity.getRotX(), entity.getRotY(),
 				entity.getRotZ(), entity.getScale());
 		shader.loadTransformationMatrix(transformationMatrix);
+		shader.loadOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
 	}
 }

@@ -1,8 +1,12 @@
-/entities/
-/models/
+/textures/
 /renderEngine/
+/skyboc/
+/skybox/
 /shaders/
 /terrain/
+/guis/
+/gui/
 /test/
-/textures/
-/toolbox/
+/entities/
+/shader/
+/models/

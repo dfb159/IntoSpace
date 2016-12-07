@@ -17,9 +17,9 @@ public class OBJLoader {
 	public static RawModel loadObjModel(String fileName, Loader loader) {
 		FileReader fr = null;
 		try {
-			fr = new FileReader(new File("res/" + fileName + ".obj"));
+			fr = new FileReader(new File(fileName + ".obj"));
 		} catch (FileNotFoundException e) {
-			System.err.println("Could not load file! " + fileName);
+			System.err.println("Could not load file! " + fileName + ".obj");
 			e.printStackTrace();
 		}
 		BufferedReader reader = new BufferedReader(fr);
@@ -100,6 +100,10 @@ public class OBJLoader {
 
 		return loader.loadToVAO(verticesArray, texturesArray, normalsArray,
 				indicesArray);
+	}
+	
+	public static RawModel loadObjModel(String fileName) {
+		return loadObjModel(fileName, DisplayManager.getLoader());
 	}
 
 }
